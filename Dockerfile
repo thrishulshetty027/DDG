@@ -22,6 +22,11 @@ ENV DB_USER=placeholder
 ENV DB_PASSWORD=placeholder
 ENV DB_HOST=localhost
 ENV DB_PORT=5432
+ENV CLOUDINARY_CLOUD_NAME=placeholder
+ENV CLOUDINARY_API_KEY=placeholder
+ENV CLOUDINARY_API_SECRET=placeholder
+ENV ADMIN_WHATSAPP=placeholder
+ENV ADMIN_PHONE=placeholder
 # ----------------------
 
 RUN python manage.py collectstatic --noinput
