@@ -14,6 +14,16 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . /app/
 
+# --- FIX ADDED HERE ---
+# Temporary fallback variables to pass Render's asset collection phase safely
+ENV SECRET_KEY=render-build-placeholder-value
+ENV DB_NAME=placeholder
+ENV DB_USER=placeholder
+ENV DB_PASSWORD=placeholder
+ENV DB_HOST=localhost
+ENV DB_PORT=5432
+# ----------------------
+
 RUN python manage.py collectstatic --noinput
 
 EXPOSE 8000
