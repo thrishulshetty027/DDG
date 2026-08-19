@@ -1,0 +1,219 @@
+{% load static %}
+{% load humanize %}
+{% load dog_tags %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ config.site_name }} — {{ config.tagline }}{% endblock %}</title>
+
+    <!-- SEO -->
+    <meta name="description" content="{{ config.meta_description|default:config.tagline }}">
+
+    <!-- Tailwind CSS (CDN for development — use build step in production) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome (icons) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Swiper CSS (carousel) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <!-- ══════════════════════════════════════════════ -->
+    <!-- STICKY HEADER                                  -->
+    <!-- ══════════════════════════════════════════════ -->
+    <header class="bg-white shadow-sm sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+            <!-- Logo -->
+            <a href="{% url 'dogs:home' %}" class="flex items-center gap-2">
+                <span class="text-3xl">🐕</span>
+                <span class="text-xl font-bold text-gray-800">{{ config.site_name }}</span>
+            </a>
+
+            <!-- Desktop Nav -->
+            <nav class="hidden md:flex items-center gap-6">
+                <a href="{% url 'dogs:home' %}" class="text-gray-600 hover:text-green-600 font-medium">Home</a>
+                <a href="{% url 'dogs:home' %}#breeds" class="text-gray-600 hover:text-green-600 font-medium">Breeds</a>
+                <a href="{% url 'dogs:home' %}#about" class="text-gray-600 hover:text-green-600 font-medium">About</a>
+                <a href="https://wa.me/{{ config.admin_whatsapp }}" target="_blank"
+                   class="bg-green-500 text-white px-5 py-2 rounded-full font-bold hover:bg-green-600 transition">
+                    <i class="fab fa-whatsapp"></i> WhatsApp Us
+                </a>
+            </nav>
+
+            <!-- Mobile Menu Button -->
+            <button id="mobile-menu-btn" class="md:hidden text-2xl text-gray-600">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+
+        <!-- Mobile Nav (hidden by default) -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t px-4 pb-4">
+            <a href="{% url 'dogs:home' %}" class="block py-3 text-gray-600 border-b">🏠 Home</a>
+            <a href="{% url 'dogs:home' %}#breeds" class="block py-3 text-gray-600 border-b">🐕 Breeds</a>
+            <a href="{% url 'dogs:home' %}#about" class="block py-3 text-gray-600 border-b">ℹ️ About</a>
+            <a href="tel:{{ config.admin_phone }}" class="block py-3 text-gray-600">📞 {{ config.admin_phone }}</a>
+        </div>
+    </header>
+
+
+    <!-- ══════════════════════════════════════════════ -->
+    <!-- MAIN CONTENT                                   -->
+    <!-- ══════════════════════════════════════════════ -->
+    <main class="pb-24 md:pb-8">
+        {% block content %}{% endblock %}
+    </main>
+
+
+    <!-- ══════════════════════════════════════════════ -->
+    <!-- FOOTER                                         -->
+    <!-- ══════════════════════════════════════════════ -->
+    <footer class="bg-gray-800 text-gray-300 py-10">
+        <div class="max-w-7xl mx-auto px-4 grid md:grid-cols-3 gap-8">
+            <div>
+                <h3 class="text-white text-lg font-bold mb-3">🐕 {{ config.site_name }}</h3>
+                <p class="text-sm">{{ config.tagline }}</p>
+            </div>
+            <div>
+                <h3 class="text-white text-lg font-bold mb-3">Contact</h3>
+                <p class="text-sm"><i class="fab fa-whatsapp text-green-400"></i> {{ config.admin_phone }}</p>
+                {% if config.admin_email %}
+                <p class="text-sm mt-1"><i class="fas fa-envelope text-blue-400"></i> {{ config.admin_email }}</p>
+                {% endif %}
+                {% if config.address %}
+                <p class="text-sm mt-1"><i class="fas fa-map-marker-alt text-red-400"></i> {{ config.address }}</p>
+                {% endif %}
+            </div>
+            <div>
+                <h3 class="text-white text-lg font-bold mb-3">Quick Links</h3>
+                <a href="{% url 'dogs:home' %}" class="block text-sm hover:text-white">Home</a>
+                <a href="{% url 'dogs:home' %}#about" class="block text-sm hover:text-white mt-1">About Us</a>
+            </div>
+        </div>
+        <div class="text-center text-sm text-gray-500 mt-8 border-t border-gray-700 pt-6">
+            © {{ config.site_name }} {% now "Y" %}. All rights reserved.
+        </div>
+    </footer>
+
+
+    <!-- ══════════════════════════════════════════════ -->
+    <!-- STICKY BOTTOM BAR (Mobile Only)                -->
+    <!-- ══════════════════════════════════════════════ -->
+    <div class="fixed bottom-0 left-0 right-0 z-50 flex md:hidden shadow-top">
+        <a href="https://wa.me/{{ config.admin_whatsapp }}" target="_blank"
+           class="flex-1 bg-green-500 text-white text-center py-4 text-lg font-bold flex items-center justify-center gap-2">
+            <i class="fab fa-whatsapp text-xl"></i> WhatsApp
+        </a>
+        <a href="tel:{{ config.admin_phone }}"
+           class="flex-1 bg-blue-600 text-white text-center py-4 text-lg font-bold flex items-center justify-center gap-2">
+            <i class="fas fa-phone text-xl"></i> Call Now
+        </a>
+    </div>
+
+
+    <!-- ══════════════════════════════════════════════ -->
+    <!-- "HELLOW HOOMAN" POP-UP MODAL                   -->
+    <!-- ══════════════════════════════════════════════ -->
+    {% if config.popup_enabled %}
+    <div id="popup-modal"
+         class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
+        <div class="bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl relative">
+            <!-- Close button -->
+            <button onclick="closeModal()"
+                    class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl">
+                <i class="fas fa-times"></i>
+            </button>
+
+            <div class="text-6xl mb-4">🐶</div>
+            <h2 class="text-2xl font-bold text-gray-800">{{ config.popup_title }}</h2>
+            <p class="text-gray-500 mt-2">{{ config.popup_message }}</p>
+
+            <div class="mt-6 space-y-3">
+                <input type="text" id="popup-name" placeholder="Your Name"
+                       class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-green-400 focus:outline-none">
+                <input type="tel" id="popup-phone" placeholder="Your Phone Number"
+                       class="w-full border-2 border-gray-200 rounded-xl px-4 py-3 focus:border-green-400 focus:outline-none">
+                <button onclick="sendPopupToWhatsApp()"
+                        class="w-full bg-green-500 hover:bg-green-600 text-white py-4 rounded-xl text-lg font-bold transition">
+                    <i class="fab fa-whatsapp"></i> Chat on WhatsApp
+                </button>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+
+    <!-- ══════════════════════════════════════════════ -->
+    <!-- SCRIPTS                                        -->
+    <!-- ══════════════════════════════════════════════ -->
+    <!-- Swiper JS (carousel) -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
+    <!-- Mobile Nav Toggle -->
+    <script>
+        document.getElementById('mobile-menu-btn').addEventListener('click', function() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        });
+    </script>
+
+    <!-- Pop-up Modal Logic -->
+    {% if config.popup_enabled %}
+    <script>
+        const POPUP_DELAY = {{ config.popup_delay_seconds }} * 1000;
+        const ADMIN_WA = '{{ config.admin_whatsapp }}';
+
+        // Show modal after delay (only once per session)
+        if (!sessionStorage.getItem('popup_shown')) {
+            setTimeout(function() {
+                document.getElementById('popup-modal').classList.remove('hidden');
+                sessionStorage.setItem('popup_shown', 'true');
+            }, POPUP_DELAY);
+        }
+
+        function closeModal() {
+            document.getElementById('popup-modal').classList.add('hidden');
+        }
+
+        function sendPopupToWhatsApp() {
+            const name = document.getElementById('popup-name').value || 'Someone';
+            const phone = document.getElementById('popup-phone').value || 'Not provided';
+            const msg = `Hi, I'm ${name}.\nMy number: ${phone}\nI'm interested in a puppy!`;
+            window.open('https://wa.me/' + ADMIN_WA + '?text=' + encodeURIComponent(msg), '_blank');
+            closeModal();
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('popup-modal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+    </script>
+    {% endif %}
+
+    <!-- Testimonial Carousel -->
+    <script>
+        if (document.querySelector('.testimonial-swiper')) {
+            new Swiper('.testimonial-swiper', {
+                slidesPerView: 1,
+                spaceBetween: 20,
+                autoplay: { delay: 4000, disableOnInteraction: false },
+                pagination: { el: '.swiper-pagination', clickable: true },
+                breakpoints: {
+                    768: { slidesPerView: 2 },
+                    1024: { slidesPerView: 3 },
+                }
+            });
+        }
+    </script>
+
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>
