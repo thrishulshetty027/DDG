@@ -1,0 +1,268 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% load dog_tags %}
+
+{% block content %}
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- HERO SECTION                                   -->
+<!-- ══════════════════════════════════════════════ -->
+<section class="relative bg-gradient-to-br from-green-500 to-green-700 text-white">
+    <div class="max-w-7xl mx-auto px-4 py-16 md:py-24 text-center">
+        <h1 class="text-4xl md:text-6xl font-bold mb-4">{{ config.hero_title }}</h1>
+        <p class="text-lg md:text-xl text-green-100 mb-8 max-w-2xl mx-auto">
+            {{ config.hero_subtitle }}
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="https://wa.me/{{ config.admin_whatsapp }}" target="_blank"
+               class="bg-white text-green-600 px-8 py-4 rounded-full text-lg font-bold hover:bg-green-50 transition shadow-lg">
+                <i class="fab fa-whatsapp"></i> WhatsApp Us Now
+            </a>
+            <a href="tel:{{ config.admin_phone }}"
+               class="border-2 border-white text-white px-8 py-4 rounded-full text-lg font-bold hover:bg-white hover:text-green-600 transition">
+                <i class="fas fa-phone"></i> Call Now
+            </a>
+        </div>
+    </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- TRUST BADGES                                   -->
+<!-- ══════════════════════════════════════════════ -->
+<section class="bg-white py-8 border-b">
+    <div class="max-w-5xl mx-auto px-4 grid grid-cols-3 gap-4 text-center">
+        <div>
+            <div class="text-3xl md:text-4xl font-bold text-green-600">{{ config.total_happy_families }}+</div>
+            <div class="text-sm text-gray-500 mt-1">Happy Families</div>
+        </div>
+        <div>
+            <div class="text-3xl md:text-4xl font-bold text-green-600">{{ config.years_in_business }}+</div>
+            <div class="text-sm text-gray-500 mt-1">Years Experience</div>
+        </div>
+        <div>
+            <div class="text-3xl md:text-4xl font-bold text-green-600">{{ config.total_breeds_available }}+</div>
+            <div class="text-sm text-gray-500 mt-1">Breeds Available</div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- FILTERS                                        -->
+<!-- ══════════════════════════════════════════════ -->
+<section id="breeds" class="max-w-7xl mx-auto px-4 pt-10">
+    <h2 class="text-3xl font-bold text-center mb-8">🐕 Our Available Puppies</h2>
+
+    <form method="GET" action="{% url 'dogs:home' %}" class="flex flex-wrap gap-3 justify-center mb-8">
+        <!-- Breed Filter -->
+        <select name="breed"
+                class="border-2 border-gray-200 rounded-xl px-4 py-3 bg-white focus:border-green-400 focus:outline-none"
+                onchange="this.form.submit()">
+            <option value="">All Breeds</option>
+            {% for breed in breeds %}
+            <option value="{{ breed.slug }}" {% if current_breed == breed.slug %}selected{% endif %}>
+                {{ breed.name }}
+            </option>
+            {% endfor %}
+        </select>
+
+        <!-- Gender Filter -->
+        <select name="gender"
+                class="border-2 border-gray-200 rounded-xl px-4 py-3 bg-white focus:border-green-400 focus:outline-none"
+                onchange="this.form.submit()">
+            <option value="">All Genders</option>
+            <option value="male" {% if current_gender == 'male' %}selected{% endif %}>Male</option>
+            <option value="female" {% if current_gender == 'female' %}selected{% endif %}>Female</option>
+        </select>
+
+        <!-- Sort -->
+        <select name="sort"
+                class="border-2 border-gray-200 rounded-xl px-4 py-3 bg-white focus:border-green-400 focus:outline-none"
+                onchange="this.form.submit()">
+            <option value="newest" {% if current_sort == 'newest' %}selected{% endif %}>Newest First</option>
+            <option value="price_low" {% if current_sort == 'price_low' %}selected{% endif %}>Price: Low → High</option>
+            <option value="price_high" {% if current_sort == 'price_high' %}selected{% endif %}>Price: High → Low</option>
+        </select>
+    </form>
+</section>
+
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- DOG CARDS GRID                                 -->
+<!-- ══════════════════════════════════════════════ -->
+<section class="max-w-7xl mx-auto px-4 pb-16">
+    {% if dogs %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {% for dog in dogs %}
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+            <!-- Photo -->
+            <a href="{% url 'dogs:detail' dog.slug %}">
+                {% if dog.primary_image and dog.primary_image.image %}
+                <img src="{{ dog.primary_image.image.url }}"
+                     alt="{{ dog.name }} — {{ dog.breed.name }}"
+                     class="w-full h-56 object-cover hover:scale-105 transition-transform duration-300">
+                {% else %}
+                <div class="w-full h-56 bg-gray-200 flex items-center justify-center text-4xl">🐕</div>
+                {% endif %}
+            </a>
+
+            <!-- Status Badge -->
+            {% if dog.status == 'reserved' %}
+            <div class="absolute top-3 right-3 bg-yellow-400 text-yellow-900 text-xs font-bold px-3 py-1 rounded-full">
+                🟡 Reserved
+            </div>
+            {% endif %}
+
+            <!-- Info -->
+            <div class="p-5">
+                <a href="{% url 'dogs:detail' dog.slug %}" class="hover:text-green-600">
+                    <h3 class="text-xl font-bold">{{ dog.name }}</h3>
+                </a>
+                <p class="text-gray-500 text-sm mt-1">
+                    {{ dog.breed.name }} • {{ dog.get_gender_display }} • {{ dog.age }}
+                </p>
+                <p class="text-2xl font-bold text-green-600 mt-3">₹{{ dog.price|floatformat:0|intcomma }}</p>
+                <p class="text-gray-400 text-sm mt-1">
+                    <i class="fas fa-map-marker-alt text-red-400"></i> {{ dog.location }}
+                </p>
+
+                <!-- CTA Buttons -->
+                <div class="flex gap-2 mt-4">
+                    {% whatsapp_url dog as wa_url %}
+                    <a href="{{ wa_url }}" target="_blank"
+                       class="flex-1 bg-green-500 hover:bg-green-600 text-white text-center py-3 rounded-xl font-bold transition">
+                        <i class="fab fa-whatsapp"></i> WhatsApp
+                    </a>
+                    <a href="tel:{{ config.admin_phone }}"
+                       class="flex-1 bg-blue-500 hover:bg-blue-600 text-white text-center py-3 rounded-xl font-bold transition">
+                        <i class="fas fa-phone"></i> Call
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-16">
+        <div class="text-6xl mb-4">🐾</div>
+        <h3 class="text-2xl font-bold text-gray-400">No puppies found</h3>
+        <p class="text-gray-400 mt-2">Try changing your filters or check back later!</p>
+        <a href="{% url 'dogs:home' %}" class="inline-block mt-4 text-green-600 font-bold">← View all puppies</a>
+    </div>
+    {% endif %}
+</section>
+
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- WHY CHOOSE US                                  -->
+<!-- ══════════════════════════════════════════════ -->
+<section class="bg-green-50 py-16">
+    <div class="max-w-5xl mx-auto px-4">
+        <h2 class="text-3xl font-bold text-center mb-10">Why Choose Us ✅</h2>
+        <div class="grid md:grid-cols-2 gap-6">
+            <div class="bg-white rounded-2xl p-6 shadow flex items-start gap-4">
+                <span class="text-3xl">💉</span>
+                <div>
+                    <h3 class="font-bold text-lg">Vaccinated Puppies</h3>
+                    <p class="text-gray-500 text-sm mt-1">All puppies come with age-appropriate vaccinations and health certificates.</p>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl p-6 shadow flex items-start gap-4">
+                <span class="text-3xl">📋</span>
+                <div>
+                    <h3 class="font-bold text-lg">KCI Registered</h3>
+                    <p class="text-gray-500 text-sm mt-1">Genuine breed certification from the Kennel Club of India.</p>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl p-6 shadow flex items-start gap-4">
+                <span class="text-3xl">🏥</span>
+                <div>
+                    <h3 class="font-bold text-lg">Health Guarantee</h3>
+                    <p class="text-gray-500 text-sm mt-1">Every puppy comes with a vet health checkup and health guarantee.</p>
+                </div>
+            </div>
+            <div class="bg-white rounded-2xl p-6 shadow flex items-start gap-4">
+                <span class="text-3xl">🚚</span>
+                <div>
+                    <h3 class="font-bold text-lg">Safe Delivery</h3>
+                    <p class="text-gray-500 text-sm mt-1">Safe and comfortable delivery to your doorstep across India.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- TESTIMONIALS CAROUSEL                          -->
+<!-- ══════════════════════════════════════════════ -->
+{% if testimonials %}
+<section class="py-16">
+    <div class="max-w-7xl mx-auto px-4">
+        <h2 class="text-3xl font-bold text-center mb-10">❤️ Happy Families</h2>
+
+        <div class="swiper testimonial-swiper">
+            <div class="swiper-wrapper">
+                {% for t in testimonials %}
+                <div class="swiper-slide">
+                    <div class="bg-white rounded-2xl shadow p-6 text-center mx-2 h-full">
+                        <!-- Stars -->
+                        <div class="text-yellow-400 text-xl">
+                            {% for i in t.rating|star_range %}⭐{% endfor %}
+                            {% for i in t.rating|empty_star_range %}☆{% endfor %}
+                        </div>
+
+                        <!-- Review -->
+                        <p class="mt-4 text-gray-600 italic">"{{ t.review }}"</p>
+
+                        <!-- Customer -->
+                        <div class="mt-4">
+                            <p class="font-bold text-gray-800">— {{ t.customer_name }}</p>
+                            <p class="text-sm text-gray-400">{{ t.city }}{% if t.dog_breed %} • Bought a {{ t.dog_breed }}{% endif %}</p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="swiper-pagination mt-6"></div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- ABOUT US                                       -->
+<!-- ══════════════════════════════════════════════ -->
+{% if config.about_us %}
+<section id="about" class="bg-white py-16">
+    <div class="max-w-3xl mx-auto px-4 text-center">
+        <h2 class="text-3xl font-bold mb-6">About Us 🐾</h2>
+        <p class="text-gray-600 leading-relaxed">{{ config.about_us|linebreaks }}</p>
+    </div>
+</section>
+{% endif %}
+
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- FINAL CTA BANNER                               -->
+<!-- ══════════════════════════════════════════════ -->
+<section class="bg-gradient-to-r from-green-500 to-green-700 text-white py-12">
+    <div class="max-w-4xl mx-auto px-4 text-center">
+        <h2 class="text-3xl font-bold mb-4">Ready to bring home your new best friend? 🐶</h2>
+        <p class="text-green-100 mb-6">Get in touch with us today!</p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <a href="https://wa.me/{{ config.admin_whatsapp }}" target="_blank"
+               class="bg-white text-green-600 px-8 py-4 rounded-full text-lg font-bold hover:bg-green-50 transition shadow-lg">
+                <i class="fab fa-whatsapp"></i> Chat on WhatsApp
+            </a>
+            <a href="tel:{{ config.admin_phone }}"
+               class="border-2 border-white px-8 py-4 rounded-full text-lg font-bold hover:bg-white hover:text-green-600 transition">
+                <i class="fas fa-phone"></i> {{ config.admin_phone }}
+            </a>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

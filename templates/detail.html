@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% load dog_tags %}
+
+{% block title %}{{ dog.name }} ({{ dog.breed.name }}) — {{ config.site_name }}{% endblock %}
+
+{% block content %}
+
+<!-- Back Button -->
+<div class="max-w-7xl mx-auto px-4 pt-6">
+    <a href="{% url 'dogs:home' %}" class="text-green-600 font-medium hover:underline">
+        <i class="fas fa-arrow-left"></i> ← Back to all puppies
+    </a>
+</div>
+
+<div class="max-w-7xl mx-auto px-4 py-8">
+    <div class="grid md:grid-cols-2 gap-8">
+
+        <!-- ════ LEFT: PHOTOS ════ -->
+        <div>
+            <!-- Main Photo -->
+            <div class="rounded-2xl overflow-hidden shadow-lg">
+                {% if dog.primary_image and dog.primary_image.image %}
+                <img id="main-photo"
+                     src="{{ dog.primary_image.image.url }}"
+                     alt="{{ dog.name }}"
+                     class="w-full h-80 md:h-[500px] object-cover">
+                {% else %}
+                <div class="w-full h-80 md:h-[500px] bg-gray-200 flex items-center justify-center text-6xl">🐕</div>
+                {% endif %}
+            </div>
+
+            <!-- Thumbnail Strip -->
+            {% if dog.images.count > 1 %}
+            <div class="flex gap-3 mt-4 overflow-x-auto pb-2">
+                {% for img in dog.images.all %}
+                <button onclick="document.getElementById('main-photo').src='{{ img.image.url }}'"
+                        class="flex-shrink-0 w-20 h-20 rounded-xl overflow-hidden border-2 border-gray-200 hover:border-green-500 transition">
+                    <img src="{{ img.image.url }}" alt="{{ img.alt_text|default:dog.name }}"
+                         class="w-full h-full object-cover">
+                </button>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- ════ RIGHT: DETAILS ════ -->
+        <div>
+            <!-- Status Badge -->
+            {% if dog.status == 'reserved' %}
+            <span class="bg-yellow-100 text-yellow-700 text-sm font-bold px-4 py-2 rounded-full">
+                🟡 Reserved — Contact to confirm
+            </span>
+            {% else %}
+            <span class="bg-green-100 text-green-700 text-sm font-bold px-4 py-2 rounded-full">
+                🟢 Available
+            </span>
+            {% endif %}
+
+            <!-- Name & Breed -->
+            <h1 class="text-3xl md:text-4xl font-bold mt-4">{{ dog.name }}</h1>
+            <p class="text-xl text-gray-500 mt-1">{{ dog.breed.name }}</p>
+
+            <!-- Price -->
+            <p class="text-4xl font-bold text-green-600 mt-4">₹{{ dog.price|floatformat:0|intcomma }}</p>
+
+            <!-- Quick Info Grid -->
+            <div class="grid grid-cols-2 gap-4 mt-6">
+                <div class="bg-gray-50 rounded-xl p-4">
+                    <p class="text-sm text-gray-400">Gender</p>
+                    <p class="font-bold">{{ dog.get_gender_display }}</p>
+                </div>
+                <div class="bg-gray-50 rounded-xl p-4">
+                    <p class="text-sm text-gray-400">Age</p>
+                    <p class="font-bold">{{ dog.age }}</p>
+                </div>
+                <div class="bg-gray-50 rounded-xl p-4">
+                    <p class="text-sm text-gray-400">Color</p>
+                    <p class="font-bold">{{ dog.color }}</p>
+                </div>
+                {% if dog.weight %}
+                <div class="bg-gray-50 rounded-xl p-4">
+                    <p class="text-sm text-gray-400">Weight</p>
+                    <p class="font-bold">{{ dog.weight }}</p>
+                </div>
+                {% endif %}
+                <div class="bg-gray-50 rounded-xl p-4">
+                    <p class="text-sm text-gray-400">Location</p>
+                    <p class="font-bold"><i class="fas fa-map-marker-alt text-red-400"></i> {{ dog.location }}</p>
+                </div>
+                {% if dog.vaccination_status %}
+                <div class="bg-gray-50 rounded-xl p-4">
+                    <p class="text-sm text-gray-400">Vaccination</p>
+                    <p class="font-bold">💉 {{ dog.vaccination_status }}</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Badges -->
+            <div class="flex flex-wrap gap-3 mt-6">
+                {% if dog.is_kci_registered %}
+                <span class="bg-blue-100 text-blue-700 text-sm font-medium px-4 py-2 rounded-full">
+                    📋 KCI Registered
+                </span>
+                {% endif %}
+                {% if dog.microchipped %}
+                <span class="bg-purple-100 text-purple-700 text-sm font-medium px-4 py-2 rounded-full">
+                    📡 Microchipped
+                </span>
+                {% endif %}
+                {% if dog.vaccination_status %}
+                <span class="bg-green-100 text-green-700 text-sm font-medium px-4 py-2 rounded-full">
+                    💉 Vaccinated
+                </span>
+                {% endif %}
+            </div>
+
+            <!-- Description -->
+            <div class="mt-6">
+                <h3 class="text-lg font-bold mb-2">About {{ dog.name }}</h3>
+                <p class="text-gray-600 leading-relaxed">{{ dog.description|linebreaks }}</p>
+            </div>
+
+            <!-- CTA BUTTONS -->
+            <div class="mt-8 space-y-3">
+                <a href="{{ whatsapp_url }}" target="_blank"
+                   class="block bg-green-500 hover:bg-green-600 text-white text-center py-4 rounded-2xl text-xl font-bold transition shadow-lg">
+                    <i class="fab fa-whatsapp text-2xl"></i> Buy on WhatsApp
+                </a>
+                <a href="tel:{{ config.admin_phone }}"
+                   class="block bg-blue-500 hover:bg-blue-600 text-white text-center py-4 rounded-2xl text-xl font-bold transition shadow-lg">
+                    <i class="fas fa-phone text-2xl"></i> Call {{ config.admin_phone }}
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════ -->
+<!-- RELATED DOGS                                   -->
+<!-- ══════════════════════════════════════════════ -->
+{% if related_dogs %}
+<section class="bg-gray-50 py-12 mt-8">
+    <div class="max-w-7xl mx-auto px-4">
+        <h2 class="text-2xl font-bold mb-6">More {{ dog.breed.name }}s You Might Like</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {% for rdog in related_dogs %}
+            <a href="{% url 'dogs:detail' rdog.slug %}"
+               class="bg-white rounded-2xl shadow overflow-hidden hover:shadow-lg transition">
+                {% if rdog.primary_image and rdog.primary_image.image %}
+                <img src="{{ rdog.primary_image.image.url }}" alt="{{ rdog.name }}"
+                     class="w-full h-40 object-cover">
+                {% else %}
+                <div class="w-full h-40 bg-gray-200 flex items-center justify-center text-3xl">🐕</div>
+                {% endif %}
+                <div class="p-3">
+                    <h3 class="font-bold">{{ rdog.name }}</h3>
+                    <p class="text-green-600 font-bold">₹{{ rdog.price|floatformat:0|intcomma }}</p>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+{% endblock %}
